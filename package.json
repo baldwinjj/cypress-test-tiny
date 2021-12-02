@@ -17,6 +17,8 @@
   "author": "Gleb Bahmutov <gleb@cypress.io>",
   "license": "ISC",
   "devDependencies": {
+    "browserslist": "4.18.1",
+    "cypress": "9.1.0",
     "ok-file": "1.5.2"
   },
   "repository": {
