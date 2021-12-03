@@ -17,6 +17,10 @@ edge 95
 edge 94
 edge 93
 edge 92
+
+# added to make sure babel transpilation is configured correctly
+edge 16
+
 firefox 94
 firefox 93
 firefox 92

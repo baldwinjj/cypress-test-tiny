@@ -1,14 +1,44 @@
-# cypress-test-tiny
+# cypress-test-tiny Error Reproduction
 
-> Tiny Cypress E2E test case
+When the browserslist config file is updated according to our project's latest usage data, the project builds successfully but Cypress throws a Webpack Compilation Error:
 
-Build status | Name | Description
-:--- | :--- | :---
-[![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-tiny.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-test-tiny) | CircleCI | Linux & Mac & Win 64
-[![Build status](https://ci.appveyor.com/api/projects/status/er7wpte7j00fsm8d/branch/master?svg=true)](https://ci.appveyor.com/project/cypress-io/cypress-test-tiny-fitqm/branch/master) | AppVeyor | Windows 32-bit
-[![Build status](https://ci.appveyor.com/api/projects/status/bpwo4jpue61xsbi5/branch/master?svg=true)](https://ci.appveyor.com/project/cypress-io/cypress-test-tiny/branch/master) | AppVeyor | Windows 64-bit
-[ ![Codeship Status for cypress-io/cypress-test-tiny](https://app.codeship.com/projects/98843020-d6d6-0135-402d-5207bc7a4d86/status?branch=master)](https://app.codeship.com/projects/263289) | Codeship Basic | Linux Docker
+```
+Error: Webpack Compilation Error
+./cypress/support/index.js
+Module build failed (from /Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/babel-loader/lib/index.js):
+BrowserslistError: Unknown version 96 of and_chr
+    at handle (/Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/packages/server/node_modules/@cypress/webpack-preprocessor/dist/index.js:180:23)
+    at finalCallback (/Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/webpack/lib/Compiler.js:257:39)
+    at /Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/webpack/lib/Compiler.js:306:14
+    at AsyncSeriesHook.eval [as callAsync] (eval at create (/Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:6:1)
+    at AsyncSeriesHook.lazyCompileHook (/Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/tapable/lib/Hook.js:154:20)
+    at /Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/webpack/lib/Compiler.js:304:22
+    at Compiler.emitRecords (/Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/webpack/lib/Compiler.js:499:39)
+    at /Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/webpack/lib/Compiler.js:298:10
+    at /Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/webpack/lib/Compiler.js:485:14
+    at AsyncSeriesHook.eval [as callAsync] (eval at create (/Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:6:1)
+    at AsyncSeriesHook.lazyCompileHook (/Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/tapable/lib/Hook.js:154:20)
+    at /Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/webpack/lib/Compiler.js:482:27
+    at /Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/neo-async/async.js:2818:7
+    at done (/Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/neo-async/async.js:3522:9)
+    at AsyncSeriesHook.eval [as callAsync] (eval at create (/Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/tapable/lib/HookCodeFactory.js:33:10), <anonymous>:6:1)
+    at AsyncSeriesHook.lazyCompileHook (/Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/tapable/lib/Hook.js:154:20)
+    at /Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/webpack/lib/Compiler.js:464:33
+    at /Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/packages/server/node_modules/graceful-fs/graceful-fs.js:111:16
+    at /Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/node_modules/graceful-fs/graceful-fs.js:61:14
+    at /Users/USER/Library/Caches/Cypress/9.1.0/Cypress.app/Contents/Resources/app/packages/server/node_modules/graceful-fs/graceful-fs.js:45:10
+    at FSReqCallback.oncomplete (node:fs:188:23)
+```
+Presumably, this is due to Cypress referencing a different version of caniuse-lite from the project. In fact, manually copying caniuse-lite from the project's node modules into the Cypress cache resolves the issue (but is obviously not ideal):
+```
+$ cp node_modules/caniuse-lite/data $(cypress cache path)/9.1.0/Cypress.app/Contents/Resources/app/node_modules/caniuse-lite
+```
 
-## Important
+Cypress package version: 9.1.0
+Cypress binary version: 9.1.0
+Electron version: 15.2.0
+Bundled Node version: 16.5.0
 
-Note that this project **DOES NOT** include Cypress dependency in the [package.json](package.json). The reason for such omission is that we use this project to test every Cypress build and do not want to spend time installing `cypress@x.x.x` just to immediately install and test `cypress@y.y.y`. Which means when submitting pull requests with a bug report, please save the problematic version of Cypress in `package.json`. Simply run `npm install --save-dev cypress` or `npm i -D cypress@x.x.x` and commit the change before submitting a pull request.
+
+Run Build: `npm run build:js`
+Run Cypress: `npm run cypress:run`
